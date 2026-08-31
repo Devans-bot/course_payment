@@ -31,18 +31,45 @@
   gap: 0.6rem;
 }
 
-.logoBadge {
-  width: 32px;
-  height: 32px;
-  background: var(--accent-blue-light);
-  border: 1px solid var(--border-blue);
-  color: var(--accent-blue);
-  border-radius: var(--radius-sm);
+.liveBadge {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  gap: 0.5rem;
+  backdrop-filter: blur(4px);
+}
+
+.liveBadgeDot {
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
 }
 
 /* Common Section Headers */
@@ -192,7 +219,7 @@
 .gapCard {
   max-width: 840px;
   margin: 0 auto;
-  background: #ffffff;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: 3rem 2.25rem;
@@ -244,7 +271,7 @@
 }
 
 .weekCard {
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 2.5rem 2rem;
@@ -270,8 +297,9 @@
 
 .weekCard:hover {
   transform: translateY(-4px);
-  border-color: var(--border-blue);
+  border-color: var(--border-green);
   box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
 }
 
 .weekCard:hover::before {
@@ -334,7 +362,7 @@
 }
 
 .areaCard {
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 100%);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 2.25rem 2rem;
@@ -346,6 +374,7 @@
   border-color: var(--border-green);
   box-shadow: var(--shadow-md);
   transform: translateY(-3px);
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
 }
 
 .areaCardTitle {
@@ -474,9 +503,9 @@
 }
 
 .enrollCard {
-  max-width: 620px;
+  max-width: 760px;
   margin: 0 auto;
-  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+  background: linear-gradient(180deg, #f0fdfa 0%, #ccfbf1 100%);
   border: 2px solid var(--accent-green);
   border-radius: var(--radius-xl);
   padding: 3.5rem 2.5rem;
@@ -601,4 +630,88 @@
   color: var(--text-muted);
   font-size: 0.85rem;
   background: #ffffff;
+}
+
+/* Form Styles */
+.formGroup {
+  margin-bottom: 0.75rem;
+  text-align: left;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #fafafa;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background-color: #ffffff;
+}
+
+.formSubmitBtn {
+  width: 100%;
+  padding: 1.1rem 2rem;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.formSubmitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 600px) {
+  .formRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .enrollCard {
+    padding: 1.75rem 1.25rem;
+  }
+  .enrollPrice {
+    font-size: 2.5rem;
+    margin: 0.5rem 0 0.2rem;
+  }
+  .enrollMicro {
+    margin-bottom: 1.2rem;
+  }
+  .eventDetailsBox {
+    padding: 1rem;
+    margin-bottom: 1.2rem;
+    gap: 0.5rem;
+  }
+  .eventDetailRow {
+    font-size: 0.85rem;
+  }
+  .formSubmitBtn {
+    padding: 0.9rem 1rem;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+  }
 }

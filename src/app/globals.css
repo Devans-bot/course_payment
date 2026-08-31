@@ -13,11 +13,11 @@
   --text-secondary: #475569;
   --text-muted: #64748b;
 
-  /* Blue Accents */
-  --accent-blue: #0284c7;
-  --accent-blue-dark: #0369a1;
-  --accent-blue-light: #e0f2fe;
-  --accent-blue-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  /* Blue Accents (Switched to green for green theme) */
+  --accent-blue: #059669;
+  --accent-blue-dark: #047857;
+  --accent-blue-light: #d1fae5;
+  --accent-blue-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
 
   /* Green Accents */
   --accent-green: #10b981;
@@ -25,9 +25,9 @@
   --accent-green-light: #dcfce7;
   --accent-green-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
 
-  /* Combined Blue-Green Gradient */
-  --accent-primary-gradient: linear-gradient(135deg, #0284c7 0%, #10b981 100%);
-  --accent-primary-gradient-hover: linear-gradient(135deg, #0369a1 0%, #059669 100%);
+  /* Combined Green Gradient */
+  --accent-primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --accent-primary-gradient-hover: linear-gradient(135deg, #059669 0%, #047857 100%);
 
   /* Borders & Shadows */
   --border-subtle: #e2e8f0;
@@ -67,9 +67,9 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   background-image: 
-    radial-gradient(circle at 10% 10%, rgba(2, 132, 199, 0.04) 0%, transparent 40%),
-    radial-gradient(circle at 90% 20%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
-    radial-gradient(circle at 50% 80%, rgba(2, 132, 199, 0.03) 0%, transparent 50%);
+    radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 20%, rgba(5, 150, 105, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
   background-attachment: fixed;
 }
 

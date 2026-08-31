@@ -1,13 +1,113 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Script from 'next/script';
+import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
 export default function Home() {
+  const router = useRouter();
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', city: '', age: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // 1. Create Order
+      const orderRes = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 2 }),
+      });
+      const orderData = await orderRes.json();
+
+      if (!orderData.id) {
+        throw new Error('Failed to create order');
+      }
+
+      // 2. Initialize Razorpay Modal
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Health Action Journey',
+        description: '21 Days Enrollment',
+        order_id: orderData.id,
+        handler: async function (response: any) {
+          try {
+            // 3. Verify Payment Signature
+            const verifyRes = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+
+            if (!verifyData.isOk) {
+              alert('Payment Verification Failed!');
+              return;
+            }
+
+            // 4. Submit to Formspree in background
+            try {
+              await fetch(`https://formspree.io/f/${process.env.NEXT_PUBLIC_FORMSPREE_FORM_ID}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  ...formData,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                }),
+              });
+            } catch (err) {
+              console.error('Formspree submission failed:', err);
+            }
+
+            // 5. Redirect to Thank You Page
+            router.push(`/thank-you?order_id=${response.razorpay_order_id}&name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}`);
+          } catch (err) {
+            console.error('Verification error:', err);
+            alert('Something went wrong during payment verification.');
+          }
+        },
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        theme: {
+          color: '#2563eb',
+        },
+      };
+
+      const rzp1 = new (window as any).Razorpay(options);
+      rzp1.on('payment.failed', function (response: any) {
+        console.error('Payment failed', response.error);
+        alert('Payment failed. Please try again.');
+      });
+      rzp1.open();
+
+    } catch (error) {
+      console.error(error);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Scroll Animation Observer
@@ -36,16 +136,17 @@ export default function Home() {
   }, []);
 
   return (
+    <>
+    <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
     <main>
       {/* Top Simple Sticky Bar */}
-      <header className={styles.navbar}>
+      <header className={styles.navbar} style={{ backgroundColor: '#0284c7' }}>
         <div className={`container ${styles.navContainer}`}>
           <div className={`${styles.logo} revealFade is-visible`}>
-            <div className={styles.logoBadge}>21</div>
-            <span>Health Action Journey</span>
+            <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1.25rem' }}>Join Cohort</span>
           </div>
           <a href="#enroll" className={`btn-primary revealFade is-visible`} style={{ padding: '0.6rem 1.4rem', fontSize: '0.85rem' }}>
-            Start My 21 Days — ₹5,100
+            Join cohort Rs2
           </a>
         </div>
       </header>
@@ -59,7 +160,7 @@ export default function Home() {
           </div>
 
           <h1 className={`${styles.heroTitle} revealSlideUp delay-100`}>
-            From Awareness to <span className={styles.gradientText}>Action</span>
+            Live Your Health <span className={styles.gradientText}>CoHort</span>
           </h1>
 
           <p className={`${styles.heroSubtitle} revealSlideUp delay-200`}>
@@ -88,7 +189,7 @@ export default function Home() {
 
           <div className="revealPop delay-500">
             <a href="#enroll" className="btn-primary" style={{ fontSize: '1.05rem', padding: '1rem 2.5rem' }}>
-              Start My 21 Days — ₹5,100
+              Start My 21 Days — ₹2
             </a>
           </div>
         </div>
@@ -256,7 +357,7 @@ export default function Home() {
                 a: "Just the 30–40 minute live session, plus whatever small action you choose to practice that day. It's designed to fit into a real, busy life.",
               },
               {
-                q: 'Is ₹5,100 worth it for 21 days?',
+                q: 'Is ₹2 worth it for 21 days?',
                 a: "That's under ₹250 a day for live coaching, tools, and accountability — less than what most people spend trying (and abandoning) diets on their own.",
               },
             ].map((faq, index) => (
@@ -282,13 +383,11 @@ export default function Home() {
       <section id="enroll" className={styles.enrollSection}>
         <div className="container">
           <div className={`${styles.enrollCard} revealPop`}>
-            <span className={`${styles.eyebrow} reveal`}>Secure Your Spot</span>
             <h2 className="revealSlideUp delay-100" style={{ fontSize: '2.5rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-              Start Your 21 Days
+              Join Cohort ! Fast
             </h2>
             
-            <div className={`${styles.enrollPrice} revealPop delay-200`}>₹5,100</div>
-            <div className={`${styles.enrollMicro} reveal delay-300`}>Under ₹250 a day</div>
+            <div className={`${styles.enrollPrice} revealPop delay-200`}>₹2</div>
 
             <div className={`${styles.eventDetailsBox} revealSlideUp delay-300`}>
               <div className={styles.eventDetailRow}>
@@ -309,9 +408,35 @@ export default function Home() {
               </div>
             </div>
 
-            <a href="#" className="btn-primary revealPop delay-400" style={{ width: '100%', padding: '1.1rem 2rem', fontSize: '1.1rem' }}>
-              Enroll Now →
-            </a>
+            <form onSubmit={handlePayment} style={{ marginTop: '1.5rem', width: '100%' }}>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Name</label>
+                  <input type="text" name="name" required className={styles.formInput} placeholder="Your Name" value={formData.name} onChange={handleInputChange} />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Email</label>
+                  <input type="email" name="email" required className={styles.formInput} placeholder="you@example.com" value={formData.email} onChange={handleInputChange} />
+                </div>
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Phone</label>
+                  <input type="tel" name="phone" required className={styles.formInput} placeholder="+91" value={formData.phone} onChange={handleInputChange} />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Age</label>
+                  <input type="number" name="age" required className={styles.formInput} placeholder="Your Age" value={formData.age} onChange={handleInputChange} />
+                </div>
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>City</label>
+                <input type="text" name="city" required className={styles.formInput} placeholder="Your City" value={formData.city} onChange={handleInputChange} />
+              </div>
+              <button type="submit" disabled={isSubmitting} className={`btn-primary revealPop delay-400 ${styles.formSubmitBtn}`}>
+                {isSubmitting ? 'Processing...' : 'Proceed to Pay ₹2 →'}
+              </button>
+            </form>
 
             <div className={`${styles.urgencyLine} reveal delay-500`}>
               Cohort seats are limited to keep the group personal
@@ -336,7 +461,7 @@ export default function Home() {
             </p>
             <div className="revealPop delay-300">
               <a href="#enroll" className={styles.closingBtn}>
-                Start My 21 Days — ₹5,100
+                Start My 21 Days — ₹2
               </a>
             </div>
           </div>
@@ -350,5 +475,6 @@ export default function Home() {
         </div>
       </footer>
     </main>
+    </>
   );
 }
